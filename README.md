@@ -1,2 +1,2 @@
-                             Algoritmos y EstructuraDeDatos - UBA
+                                                    Algoritmos y EstructuraDeDatos - UBA
 ex-Algo2
