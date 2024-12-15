@@ -32,7 +32,7 @@ public class arreglos {
 
 
         for (int index = 0; index < numeros.length; index++){ // Al usar length en un array no dice el tamaño de la matriz.
-            System.out.println(numeros[index]); // Esto imprime -> 1,2,0,4,5
+            System.out.println(numeros[index]); // Esto imprime -> 10,20,70,40,50
         } 
 
        //-------- 3era FORMA: 
