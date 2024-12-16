@@ -1,4 +1,4 @@
-public class operadores {
+public class operadores3 {
     public static void main(String[] args) throws Exception {
        int a = 5;
        int b = 4;

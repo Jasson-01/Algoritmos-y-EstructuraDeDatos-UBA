@@ -1,5 +1,5 @@
 import java.util.Scanner;
-public class ssswitch {
+public class switch5 {
 
     public static void main(String[] args) throws Exception {
 

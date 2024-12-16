@@ -1,4 +1,4 @@
-public class string {
+public class string2 {
     public static void main(String[] args) throws Exception {
 
         String texto = "Este es un texto asignado a una variable string";

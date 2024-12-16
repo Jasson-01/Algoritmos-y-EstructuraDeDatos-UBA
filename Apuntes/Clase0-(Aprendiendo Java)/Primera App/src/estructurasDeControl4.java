@@ -1,4 +1,4 @@
-public class estructurasDeControl {
+public class estructurasDeControl4 {
     public static void main(String[] args) throws Exception {
        
        int edad = 18;

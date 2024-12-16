@@ -1,4 +1,4 @@
-public class forr {
+public class for6 {
 
     public static void main(String[] args) throws Exception {
         
