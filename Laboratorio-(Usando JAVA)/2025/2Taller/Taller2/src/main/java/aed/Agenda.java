@@ -8,6 +8,8 @@ public class Agenda {
     public Agenda(Fecha fechaActual) {
         // Implementar
         this.fechaActual = new Fecha(fechaActual.dia(),fechaActual.mes());
+        this.recordatorios = new ArregloRedimensionableDeRecordatorios();
+        this.horario = new Horario(0,0);
     }
 
     public void agregarRecordatorio(Recordatorio recordatorio) {
@@ -19,11 +21,20 @@ public class Agenda {
     @Override
     public String toString() {
         // Implementar
-        return fechaActual.dia() + "/" + fechaActual.mes() + "\n" + "=====" + "Clase Algo @ " + fechaActual.dia() + "/" + fechaActual.mes() + horario.hora() + ":" + horario.minutos() + "\n" + "Labo Algo @ " + fechaActual.dia() + "/" + fechaActual.mes();
+       String fecha = fechaActual.dia() + "/" + fechaActual.mes() + "\n" + "=====" + "\n";
+
+       for (int i = 0; i<recordatorios.longitud(); i++){
+           Recordatorio toDo = recordatorios.obtener(i);
+           if (toDo.fecha().equals(fechaActual)){
+               fecha += toDo.toString() + "\n";
+           }
+       } 
+       return fecha;
     }
 
     public void incrementarDia() {
         // Implementar
+        fechaActual.incrementarDia();
     }
 
     public Fecha fechaActual() {
