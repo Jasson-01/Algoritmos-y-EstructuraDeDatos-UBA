@@ -18,12 +18,12 @@ public class Fecha {
 
     public Integer dia() {
         // Implementar
-        return this.dia;
+        return dia;
     }
 
     public Integer mes() {
         // Implementar
-        return this.mes;
+        return mes;
     }
     
     @Override

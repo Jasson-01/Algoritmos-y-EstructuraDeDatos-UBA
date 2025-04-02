@@ -10,7 +10,7 @@ class ArregloRedimensionableDeRecordatorios {
 
     public int longitud() {
         // Implementar
-        return this.recordatorios.length;
+        return recordatorios.length;
     }
 
     public void agregarAtras(Recordatorio i) {
@@ -19,10 +19,10 @@ class ArregloRedimensionableDeRecordatorios {
         Recordatorio[] nuevoRecordatorios = new Recordatorio[this.recordatorios.length + 1];
 
         for (int j = 0; j < this.recordatorios.length; j++) {
-            nuevoRecordatorios[j] = obtener(j);
+            nuevoRecordatorios[j] = this.recordatorios[j];
         }
 
-        nuevoRecordatorios[nuevoRecordatorios.length - 1] = new Recordatorio(i.mensaje(), i.fecha(), i.horario());
+        nuevoRecordatorios[nuevoRecordatorios.length - 1] = i;
 
         this.recordatorios = nuevoRecordatorios;
 
@@ -51,21 +51,19 @@ class ArregloRedimensionableDeRecordatorios {
 
     public ArregloRedimensionableDeRecordatorios(ArregloRedimensionableDeRecordatorios vector) {
         // Implementar
-        this.recordatorios = new Recordatorio[vector.longitud()];
-
-        for (int i = 0; i < vector.longitud(); i++) {
-            Recordatorio redimensionable = vector.obtener(i);
-            this.recordatorios[i] = new Recordatorio(redimensionable.mensaje(), redimensionable.fecha(),
-                    redimensionable.horario());
-
-        }
+        recordatorios = vector.recordatorios.clone();
     }
 
     public ArregloRedimensionableDeRecordatorios copiar() {
         // Implementar
-        ArregloRedimensionableDeRecordatorios copiaArreglo = new ArregloRedimensionableDeRecordatorios();
-        copiaArreglo.recordatorios = this.recordatorios;
-        ArregloRedimensionableDeRecordatorios copiaFinal = new ArregloRedimensionableDeRecordatorios(copiaArreglo);
-        return copiaFinal;
+        ArregloRedimensionableDeRecordatorios copiaRecordatorio = new ArregloRedimensionableDeRecordatorios();
+        copiaRecordatorio.recordatorios = new Recordatorio[this.recordatorios.length];
+
+        for (int i=0; i < this.recordatorios.length; i++){
+            Recordatorio recordatorioOriginal = this.recordatorios[i];
+            copiaRecordatorio.recordatorios[i] = new Recordatorio(recordatorioOriginal.mensaje(),recordatorioOriginal.fecha(),recordatorioOriginal.horario());
+        }
+        return copiaRecordatorio;
+
     }
 }
