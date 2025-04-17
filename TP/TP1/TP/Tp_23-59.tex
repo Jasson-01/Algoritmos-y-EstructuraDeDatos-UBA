@@ -1,0 +1,109 @@
+\documentclass[10pt,a4paper]{article}
+
+\input{AEDmacros}
+\usepackage{caratula} % Version modificada para usar las macros de algo1 de ~> https://github.com/bcardiff/dc-tex
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{parskip}
+\usepackage{indentfirst}
+\usepackage{changepage}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\lstdefinestyle{base}{
+	emptylines=1,
+	breaklines=true,
+	moredelim=**[is][\color{darkgray}]{@}{@},
+	basicstyle=\ttfamily\footnotesize\bfseries,
+	frame=tb,
+}
+
+\newenvironment{IndentedBlock}
+{
+	\begin{list}{}{
+			\leftmargin=2em
+			\rightmargin=0em
+			\topsep=0pt
+			\partopsep=0pt
+			\parsep=3pt
+			\itemsep=0pt
+		}
+		\item\relax
+	}
+	{
+	\end{list}
+}
+
+
+
+\titulo{Trabajo práctico 1}
+\subtitulo{Especificación de TADs}
+
+\fecha{\today}
+
+\materia{Algoritmos y Estructuras de Datos}
+\grupo{Grupo 423:59}
+
+\integrante{Apellido, Nombre1}{001/01}{email1@dominio.com}
+\integrante{Apellido, Nombre2}{002/01}{email2@dominio.com}
+\integrante{Apellido, Nombre3}{003/01}{email3@dominio.com}
+\integrante{Apellido, Nombre4}{004/01}{email4@dominio.com}
+% Pongan cuantos integrantes quieran
+
+% Declaramos donde van a estar las figuras
+% No es obligatorio, pero suele ser comodo
+\graphicspath{{../static/}}
+
+\begin{document}
+
+\maketitle
+
+\newcommand{\tadheader}[2]{
+	{\normalfont\bfseries\ttfamily\noindent TAD}%
+	\ %
+	{\normalfont\ttfamily #1}%
+	\ifthenelse{\equal{#2}{}}{}{%
+		{$\langle$#2$\rangle$}%
+	}%
+}
+\newenvironment{tad}[2]{
+	\tadheader{#1}{#2}
+	\{%
+	\begin{IndentedBlock}
+	}{
+	\end{IndentedBlock}
+	\}%
+}
+
+\begin{tad}{Berretacoin}{}
+	
+	
+	
+	
+	\begin{proc}{maximosTenedores}{\In b : Berretacion}{\TLista{Usuario}}
+		\requiere{|b.cadenaBloques| > 0}
+		\asegura{ sonMaximosTenedores(b.cadenaBloques, res)} 
+		\pred{sonMaximosTenedores}{c : \TLista{bloque},l:\TLista{Usuario}}{\paraTodo[unalinea]{v}{Usuario}{(v \in l \wedge a = ventasVendedor(c,u) \wedge b = ventasComprador(c,v) \implicaLuego \paraTodo{v}{Usuario}{usuarioDeBerretacoin(c,v) \implicaLuego (x=ventasVendedor(c,v) \wedge y=ventasComprador(c,v)  \wedge patrimonio(a,b) \geq patrimonio(x,y) } )}}
+		
+	\end{proc}
+	
+	\begin{proc}{montoMedio}{\In b : Berretacoin}{\ensuremath{\mathds{R}}}
+		\requiere{ \existe[unalinea]{u}{bloque}{u \in b.cadenaBloques  \wedge |u.transacciones| \geq 2  } }
+		\asegura{res = \frac{(sumaMontoTotales(b.cadenaBloques) - sumaMontoTransaccionesCreacion(b.cadenaBloques))}{(cantidadTransaccionesTotales(b.cadenaBloques) - cantidadTransaccionesCreacion(b.cadenaBloques))}}
+		\aux{sumaMontoTotales}{c : \TLista{bloque}}{\ent}{\sum\limits_{i=0}^{|c|-1} (sumaMontoDeBloque[i])}
+		\aux{SumaMontoDeBloque}{b : bloque}{\ent}{\sum\limits_{i=0}^{|b.transacciones|-1} (b.transacciones[i]_1)}
+		\aux{sumaMontoTransaccionesCreacion}{c : \TLista{bloque}}{\ent}{\sum\limits_{i=0}^{|c|-1} (IfThenElseFi( i < 3000, c[i].transacciones[0]_1, 0))}
+		\aux{cantidadTransaccionesTotales}{c : \TLista{bloque}}{\ent}{\sum\limits_{i=0}^{|c|-1} (|c[i].transacciones|)}
+		\aux{CantidadTransaccionesCreacion}{c : \TLista{bloque}}{\ent}{ IfThenElseFi(|c| < 3000, |c|, 3000)}
+	\end{proc}
+	
+	\begin{proc}{cotizacionAPesos}{\In b : Berretacion, \In P : \TLista{\ent}}{\TLista{\ent}}
+		\requiere{|b.cadenaBloques| = |P|}
+		\asegura{ |res| = |P| }
+		\asegura{(\paraTodo[unalinea]{i}{\ent}{0 \leq i < |P| \implicaLuego res[i] = (sumaMontoDeBloque(b.cadenaBloques[i])-1) * P[i] })} 
+	\end{proc}
+	
+	
+\end{tad}
+
+
+\end{document}
