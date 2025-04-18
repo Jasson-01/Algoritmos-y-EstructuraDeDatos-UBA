@@ -10,8 +10,6 @@
 \usepackage{amssymb}
 \usepackage{xcolor}
 
-
-
 \lstdefinestyle{base}{
 	emptylines=1,
 	breaklines=true,
@@ -35,8 +33,6 @@
 	{
 	\end{list}
 }
-
-
 
 \titulo{Trabajo práctico 1}
 \subtitulo{Especificación de TADs}
@@ -86,18 +82,9 @@ Transaccion ES  struct\textless id : \ent, monto : \ent, comprador : Usuario, ve
 Bloque ES struct\textless id : \ent, transacciones : \TLista{Transaccion}\textgreater \\
 CadenaBloques ES \TLista{Bloque} \\
 
-
-
-
-
 \begin{tad}{Berretacoin}{}
 	
 	\textbf{obs} cb : CadenaBloques
-	
-	
-
-	
-	
 	
 	\begin{proc}{crearCoin}{}{Berretacoin \{ }
 	
@@ -117,8 +104,6 @@ CadenaBloques ES \TLista{Bloque} \\
 		\asegura{bloqueAgregado(bl,b.cb) \allowbreak \yLuego \\	 viejosBloquesMantenidos(b.cb, b_0.cb) \yLuego \\ estaOrdenado(b.cb) } 
 		
 		\textcolor{darkgray}{(\textsc{NOTA 1}: Predicados del Requiere y sus Auxiliares )} 
-		
-		
 		
 		\pred{bloqueValido}{bl : Bloque, cb : CadenaBloques}{
 		idBloqueMayorEnUno(bl,cb) \yLuego \\
@@ -155,7 +140,6 @@ CadenaBloques ES \TLista{Bloque} \\
 		\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego t[i].comprador \neq t[i].vendedor } \yLuego \\
 		\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego montoValido(cb,t,t[i],i)} }
 		
-
 		\pred{montoValido}{cb : CadenaBloques, ts : \TLista{Transaccion}, t : Transaccion, i : \ent}{patrimonio(ventasEnLaCadenaBloques(cb,t.comprador), \\ comprasEnLaCadenaBloques(cb, t.comprador), ventasEnElMismoBloque(ts, t.comprador, i),\\ comprasEnElMismoBloque(ts, t.comprador, i)) \geq t.monto }
 		
 		\aux{ventasEnLaCadenaBloques}{cb : CadenaBloques, id : Usuario}{\ent}{\\
@@ -171,18 +155,13 @@ CadenaBloques ES \TLista{Bloque} \\
 		\aux{comprasEnElMismoBloque}{t : \TLista{Transaccion}, id : Usuario, i : \ent}{\ent}{\\
 			\sum\limits_{j=0}^{i-1} (IfThenElse(id = t[j].comprador \textbf{,} t[j].monto \textbf{,} 0))}
 		
-		
 		\aux{patrimonio}{VELCB: \ent, CELCB : \ent , VEEMB : \ent, CEEMB : \ent}{\ent}{ \\
 		(VEEMB + VELCB) - (CEEMB + CELCB)}
 		
-		
 		\textcolor{darkgray}{(\textsc{NOTA 2}: Predicados del Asegura )} 
-		
-		
+
 		\pred{bloqueAgregado}{bl : Bloque, cb : CadenaBloques}{ bl \in cb}
-		
-		
-		
+
 		\pred{viejosBloquesMantenidos}{cb : CadenaBloques, cb\_0 : CadenaBloques}{
 			\paraTodo{B}{Bloque}{B \in cb\_0 \implicaLuego B \in cb}}
 		
@@ -191,10 +170,6 @@ CadenaBloques ES \TLista{Bloque} \\
 		
 	\end{proc}
 	\}
-	
-	
-	
-	%\newpage
 	
 	\begin{proc}{maximosTenedores}{\In b : Berretacion}{\TLista{Usuario}}
 		\requiere{|b.cb| > 0}
@@ -222,12 +197,8 @@ CadenaBloques ES \TLista{Bloque} \\
 		\aux{sumaMontoTransaccionesCreacion}{c : CadenaBloques  }{\ent}{ \\
 		\sum\limits_{i=0}^{|c|-1} (IfThenElseFi( i < 3000, c[i].transacciones[0]_1, 0))}
 	
-	
 
-	
-	
 		\aux{cantidadTransaccionesTotales}{c : CadenaBloques }{\ent}{\\  \sum\limits_{i=0}^{|c|-1} (|c[i].transacciones|)}
-		
 		
 		
 		\aux{CantidadTransaccionesCreacion}{c : CadenaBloques}{\ent}{ \\ IfThenElseFi(|c| < 3000, |c|, 3000)}
