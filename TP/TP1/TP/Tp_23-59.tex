@@ -130,8 +130,8 @@ CadenaBloques ES \TLista{Bloque} \\
 		}
 		
 		\pred{transaccionDeCreacionValida}{t : Transaccion, cb : CadenaBloques}{
-		((|cb| \leq 3000) \implica ( t.comprador = 0 \wedge t.vendedor  \textgreater 0) \wedge  \\
-		(vendedoresDeCreacionDistintos(t,cb) \wedge t.monto = 1 \wedge t.id \textgreater 0))
+		(|cb| \leq 3000 \implica  t.comprador = 0 \wedge t.vendedor  \textgreater 0 \wedge  \\
+		vendedoresDeCreacionDistintos(t,cb) \wedge t.monto = 1 \wedge t.id \textgreater 0)
 		}
 		
 		\pred{vendedoresDeCreacionDistintos}{t : Transaccion, cb : CadenaBloques}{\paraTodo{i}{\ent}{0 \leq i \textless |cb| \implicaLuego t.vendedor \neq cb.[i].transacciones[0].vendedor}
@@ -152,28 +152,28 @@ CadenaBloques ES \TLista{Bloque} \\
 		\newpage
 		
 		\pred{transaccionesSinEmision}{t : \TLista{Transaccion}, cb : CadenaBloques}{\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego t[i].id \textgreater 0} \yLuego 
-		\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego t[i]_2 \neq t[i]_3 } \yLuego \\
+		\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego t[i].comprador \neq t[i].vendedor } \yLuego \\
 		\paraTodo[unalinea]{i}{\ent}{0 \leq i \textless |t| \implicaLuego montoValido(cb,t,t[i],i)} }
 		
 
 		\pred{montoValido}{cb : CadenaBloques, ts : \TLista{Transaccion}, t : Transaccion, i : \ent}{patrimonio(ventasEnLaCadenaBloques(cb,t.comprador), \\ comprasEnLaCadenaBloques(cb, t.comprador), ventasEnElMismoBloque(ts, t.comprador, i),\\ comprasEnElMismoBloque(ts, t.comprador, i)) \geq t.monto }
 		
 		\aux{ventasEnLaCadenaBloques}{cb : CadenaBloques, id : Usuario}{\ent}{\\
-		\sum\limits_{i=0}^{|cb|} (\sum\limits_{j=0}^{|cb[i]|} (IfThenElse(id = cb[i].transaccion[j].vendedor\textbf{,} cb[i].transaccion[j].monto \textbf{,} 0)))}
+		\sum\limits_{i=0}^{|cb|} (\sum\limits_{j=0}^{|cb[i]|} (IfThenElse(id = cb[i].transacciones[j].vendedor\textbf{,} cb[i].transacciones[j].monto \textbf{,} 0)))}
 		
 		\aux{comprasEnLaCadenaBloques}{cb : CadenaBloques, id : Usuario}{\ent}{\\
-		\sum\limits_{i=0}^{|cb|} (\sum\limits_{j=0}^{|cb[i]|} (IfThenElse(id = cb[i].transaccion[j].comprador\textbf{,} cb[i].transaccion[j].monto \textbf{,} 0)))}
+		\sum\limits_{i=0}^{|cb|} (\sum\limits_{j=0}^{|cb[i]|} (IfThenElse(id = cb[i].transacciones[j].comprador\textbf{,} cb[i].transacciones[j].monto \textbf{,} 0)))}
 		
 		
 		\aux{ventasEnElMismoBloque}{ t : \TLista{Transaccion}, id : Usuario, i : \ent}{\ent}{\\
-		\sum\limits_{j=0}^{i-1} (IfThenElse(id = t[j].vendedor \textbf{,} t[j].monto \textbf{,} 0)}
+		\sum\limits_{j=0}^{i-1} (IfThenElse(id = t[j].vendedor \textbf{,} t[j].monto \textbf{,} 0))}
 		
 		\aux{comprasEnElMismoBloque}{t : \TLista{Transaccion}, id : Usuario, i : \ent}{\ent}{\\
-			\sum\limits_{j=0}^{i-1} (IfThenElse(id = t[j].comprador \textbf{,} t[j].monto \textbf{,} 0)}
+			\sum\limits_{j=0}^{i-1} (IfThenElse(id = t[j].comprador \textbf{,} t[j].monto \textbf{,} 0))}
 		
 		
 		\aux{patrimonio}{VELCB: \ent, CELCB : \ent , VEEMB : \ent, CEEMB : \ent}{\ent}{ \\
-		(VEEMB + VELCB) - (CEEMB - CELCB)}
+		(VEEMB + VELCB) - (CEEMB + CELCB)}
 		
 		
 		\textcolor{darkgray}{(\textsc{NOTA 2}: Predicados del Asegura )} 
@@ -201,12 +201,12 @@ CadenaBloques ES \TLista{Bloque} \\
 		\asegura{ sonMaximosTenedores(b.cb, res)} 
 		
 		\pred{sonMaximosTenedores}{cb : CadenaBloques, res : \TLista{Usuario}}{
-		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica UDB(cb,u) \wedge \\
-		\paraTodo[unalinea]{v}{Usuario}{UDB(cb,v) \implica \\ (ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(vb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-coprasEnLaCadenaBloques(cb,u)})  }
+		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica usuarioDeBloque(cb,u) \wedge \\
+		\paraTodo[unalinea]{v}{Usuario}{usuarioDeBloque(cb,v) \implica \\ (ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(cb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-comprasEnLaCadenaBloques(cb,u)})  }
 		}
 		
-		\pred{UDB}{cb : CadenaBloques, u : Usuario}{
-		\existe[unalinea]{b}{Bloque}{b \in cb \wedge \existe[unalinea]{t}{Transaccion}{t \in cb \wedge (u = t_2 \vee u = t_3)}}}
+		\pred{usuarioDeBloque}{cb : CadenaBloques, u : Usuario}{
+		\existe[unalinea]{b}{Bloque}{b \in cb \wedge \existe[unalinea]{t}{Transaccion}{t \in b \wedge (u = t_2 \vee u = t_3)}}}
 		
 		
 	\end{proc}
@@ -235,7 +235,8 @@ CadenaBloques ES \TLista{Bloque} \\
 		
 	\end{proc}
 	
-		\textcolor{darkgray}{(\textsc{NOTA 3}: Aquí reusamos el auxiliar sumaMontoDeBloque )} 
+		\textcolor{darkgray}{(\textsc{NOTA 3}: Aquí en el procediminto de cotizacionAPesos reusamos el auxiliar sumaMontoDeBloque )} \\
+		\textcolor{darkgray}{(\textsc{NOTA 4}: El -1 que resta al auxiliar sumaMontoDeBloque es por los montos de las transacciones de creación )} 
 	
 	\begin{proc}{cotizacionAPesos}{\In b : Berretacion, \In P : \TLista{\ent}}{\TLista{\ent}}
 		\requiere{|b.cb| = |P|}
