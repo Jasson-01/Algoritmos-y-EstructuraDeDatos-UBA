@@ -40,7 +40,7 @@
 \fecha{\today}
 
 \materia{Algoritmos y Estructuras de Datos}
-\grupo{Grupo 423:59}
+\grupo{Grupo 23:59}
 
 \integrante{Cestau, Nicolás}{834/23}{nicocestau@gmail.com}
 \integrante{Ricci, Fabrizio Bruno}{ 532/22}{fabrizioricci819@gmail.com}
@@ -115,11 +115,11 @@ CadenaBloques ES \TLista{Bloque} \\
 		}
 		
 		\pred{transaccionDeCreacionValida}{t : Transaccion, cb : CadenaBloques}{
-		(|cb| \leq 3000 \implica  t.comprador = 0 \wedge t.vendedor  \textgreater 0 \wedge  \\
+		|cb| \leq 3000 \implica  (t.comprador = 0 \wedge t.vendedor  \textgreater 0 \wedge  \\
 		vendedoresDeCreacionDistintos(t,cb) \wedge t.monto = 1 \wedge t.id \textgreater 0)
 		}
 		
-		\pred{vendedoresDeCreacionDistintos}{t : Transaccion, cb : CadenaBloques}{\paraTodo{i}{\ent}{0 \leq i \textless |cb| \implicaLuego t.vendedor \neq cb.[i].transacciones[0].vendedor}
+		\pred{vendedoresDeCreacionDistintos}{t : Transaccion, cb : CadenaBloques}{\paraTodo{i}{\ent}{0 \leq i \textless |cb| \implicaLuego t.vendedor \neq cb[i].transacciones[0].vendedor}
 		}
 		
 		
@@ -165,22 +165,22 @@ CadenaBloques ES \TLista{Bloque} \\
 		\pred{viejosBloquesMantenidos}{cb : CadenaBloques, cb\_0 : CadenaBloques}{
 			\paraTodo{B}{Bloque}{B \in cb\_0 \implicaLuego B \in cb}}
 		
-		\pred{estaOrdenado}{cb : CadenaBloque}{
+		\pred{estaOrdenado}{cb : CadenaBloques}{
 		 \paraTodo{i}{\ent}{0 \leq i \textless |cb|-1 \implicaLuego cb[i].id \textless cb[i+1].id}} 
 		
 	\end{proc}
 	\}
 	
-	\begin{proc}{maximosTenedores}{\In b : Berretacion}{\TLista{Usuario}}
+	\begin{proc}{maximosTenedores}{\In b : Berretacion}{Usuarios}
 		\requiere{|b.cb| > 0}
 		\asegura{ sonMaximosTenedores(b.cb, res)} 
 		
-		\pred{sonMaximosTenedores}{cb : CadenaBloques, res : \TLista{Usuario}}{
-		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica usuarioDeBloque(cb,u) \wedge \\
-		\paraTodo[unalinea]{v}{Usuario}{usuarioDeBloque(cb,v) \implica \\ (ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(cb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-comprasEnLaCadenaBloques(cb,u)})  }
+		\pred{sonMaximosTenedores}{cb : CadenaBloques, res : Usuarios}{
+		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica usuarioDeCoin(cb,u) \wedge \\
+		\paraTodo[unalinea]{v}{Usuario}{usuarioDeCoin(cb,v) \implica \\ (ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(cb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-comprasEnLaCadenaBloques(cb,u)})  }
 		}
 		
-		\pred{usuarioDeBloque}{cb : CadenaBloques, u : Usuario}{
+		\pred{usuarioDeCoin}{cb : CadenaBloques, u : Usuario}{
 		\existe[unalinea]{b}{Bloque}{b \in cb \wedge \existe[unalinea]{t}{Transaccion}{t \in b \wedge (u = t_2 \vee u = t_3)}}}
 		
 		
@@ -191,11 +191,11 @@ CadenaBloques ES \TLista{Bloque} \\
 		\requiere{ \existe[unalinea]{u}{bloque}{u \in b.cb  \wedge |u.transacciones| \geq 2  } }
 		\asegura{res = \frac{(sumaMontoTotales(b.cb) - sumaMontoTransaccionesCreacion(b.cb))}{(cantidadTransaccionesTotales(b.cb) - cantidadTransaccionesCreacion(b.cb))}}
 		\aux{sumaMontoTotales}{c : CadenaBloques}{\ent}{\\ \sum\limits_{i=0}^{|c|-1} (sumaMontoDeBloque[i])}
-		\aux{SumaMontoDeBloque}{b : Bloque}{\ent}{\\ \sum\limits_{i=0}^{|b.transacciones|-1} (b.transacciones[i]_1)}
+		\aux{SumaMontoDeBloque}{b : Bloque}{\ent}{\\ \sum\limits_{i=0}^{|b.transacciones|-1} (b.transacciones[i].monto)}
 		
 		
 		\aux{sumaMontoTransaccionesCreacion}{c : CadenaBloques  }{\ent}{ \\
-		\sum\limits_{i=0}^{|c|-1} (IfThenElseFi( i < 3000, c[i].transacciones[0]_1, 0))}
+		\sum\limits_{i=0}^{|c|-1} (IfThenElseFi( i < 3000, c[i].transacciones[0].monto, 0))}
 	
 
 		\aux{cantidadTransaccionesTotales}{c : CadenaBloques }{\ent}{\\  \sum\limits_{i=0}^{|c|-1} (|c[i].transacciones|)}
@@ -208,6 +208,7 @@ CadenaBloques ES \TLista{Bloque} \\
 	
 		\textcolor{darkgray}{(\textsc{NOTA 3}: Aquí en el procediminto de cotizacionAPesos reusamos el auxiliar sumaMontoDeBloque )} \\
 		\textcolor{darkgray}{(\textsc{NOTA 4}: El -1 que resta al auxiliar sumaMontoDeBloque es por los montos de las transacciones de creación )} 
+		\textcolor{darkgray}{(\textsc{NOTA 5}: P representa las cotizaciones)} 
 	
 	\begin{proc}{cotizacionAPesos}{\In b : Berretacion, \In P : \TLista{\ent}}{\TLista{\ent}}
 		\requiere{|b.cb| = |P|}
