@@ -134,37 +134,35 @@ public class ListaEnlazada<T> implements Secuencia<T> {
     }
 
     private class ListaIterador implements Iterador<T> {
-        private int posElementos;
-        private int longitud;
         
-       public ListaIterador() {
-          posElementos = 0;
-          longitud = longitud();
-       }
+        int dedito;
+        ListaIterador(){
+            dedito = 0;
+        }
 
         public boolean haySiguiente() {
-            return posElementos <longitud;
+            return dedito < longitud();
         }
 
         public boolean hayAnterior() {
-            return posElementos >0;
+            return dedito > 0;
         }
 
         public T siguiente() {
             Nodo copiaActual = primero;
-            for (int j = 0; j < posElementos; j++) { 
+            for (int j = 0; j < dedito; j++) { 
                 copiaActual = copiaActual.sig; 
             }
-            posElementos++;
+            dedito++;
             return copiaActual.valor;
         }
 
         public T anterior() {
             Nodo copiaActual = primero;
-            for (int j = 0; j < posElementos-1; j++) { 
+            for (int j = 0; j < dedito-1; j++) { 
                 copiaActual = copiaActual.sig; 
             }
-            posElementos--;
+            dedito--;
             return copiaActual.valor;
         }
     }
