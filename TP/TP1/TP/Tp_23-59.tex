@@ -173,8 +173,8 @@ CadenaBloques ES \TLista{Bloque} \\
 		\asegura{ sonMaximosTenedores(b.cb, res) \wedge noFaltaNinguno(b.cb,res)} 
 		
 		\pred{sonMaximosTenedores}{cb : CadenaBloques, res : Usuarios}{
-		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica usuarioDeCoin(cb,u) \wedge \\
-		\paraTodo[unalinea]{v}{Usuario}{usuarioDeCoin(cb,v) \implica \\ (ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(cb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-comprasEnLaCadenaBloques(cb,u)})  }
+		\paraTodo[unalinea]{u}{Usuario}{u \in res \implica (usuarioDeCoin(cb,u) \wedge \\
+		\paraTodo[unalinea]{v}{Usuario}{usuarioDeCoin(cb,v) \implica \\ ((ventasEnLaCadenaBloques(cb,v)-comprasEnLaCadenaBloques(cb,v)) \leq \\ (ventasEnLaCadenaBloques(cb,u)-comprasEnLaCadenaBloques(cb,u)})))  }
 		}
 		
 		\pred{usuarioDeCoin}{cb : CadenaBloques, u : Usuario}{
