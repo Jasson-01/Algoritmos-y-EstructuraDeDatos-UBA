@@ -27,7 +27,7 @@ public class Usuario implements Comparable<Usuario> {
 
         return res;
     }
-
+    
     @Override
     public boolean equals(Object otro){
         boolean otraEsNull = (otro == null);

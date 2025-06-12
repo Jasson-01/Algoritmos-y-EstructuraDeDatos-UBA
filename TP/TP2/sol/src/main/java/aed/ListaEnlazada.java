@@ -8,19 +8,12 @@ public class ListaEnlazada<T> implements Secuencia<T> {
     private int size;
 
 
-    private class Nodo {
+    public class Nodo {
         T valor;
         Nodo next;
         Nodo previous;
 
         Nodo( T v){ valor = v;}
-    }
-
-    public class Handle {
-        private Nodo nodoApuntado;
-        public Handle(Nodo n){
-            this.nodoApuntado = n;
-        }
     }
 
     public ListaEnlazada() {
@@ -76,36 +69,40 @@ public class ListaEnlazada<T> implements Secuencia<T> {
         return actual.valor;
     }
 
-    public void eliminar(Handle h) {
-        Nodo actual = h.nodoApuntado;
-        Nodo anterior;
-
-        if (actual == first) {
-            first = actual.next;
-        } else {
-            anterior = actual.previous;
-            anterior.next = actual.next;
+    public void eliminar(T valor) {
+        Nodo actual = first;
+        Nodo anterior = null;
+        while(actual != null){
+            if (actual.valor == valor) {
+                if (anterior == null) {
+                    first = actual.next;
+                    if (first != null) first.previous = null;
+                } else {
+                    anterior.next = actual.next;
+                    if (actual.next != null) actual.next.previous = anterior;
+                }
+                size--;
+                return;
+            }
+            anterior = actual;
+            actual = actual.next;
         }
-        size--;
+    }
+
+    public void eliminarRapido(Nodo n){
+        if(n != first && n != last){
+            n.previous.next = n.next;
+            n.next.previous = n.previous;
+        }else if(n == first){
+            first = n.next;
+            first.previous = null;
+        }else{
+            last = n.previous;
+            last.next = null;
+        }
+        
     }
     
-
-    public void modificarValor(Handle h, T elem) { // Hacer con handle en lugar de indice
-        Nodo actual = h.nodoApuntado;
-        actual.valor = elem;
-        /*  Nodo actual = first;
-        if(indice == 0){
-            actual.valor = elem;
-        }
-
-        actual = actual.next;
-        int j = 1;
-        while(j < indice){
-            actual = actual.next;
-            j++;
-        }
-        actual.valor = elem;     */      
-    }
 
     public ListaEnlazada(ListaEnlazada<T> lista) {
         Nodo actual = lista.first;
@@ -173,4 +170,7 @@ public class ListaEnlazada<T> implements Secuencia<T> {
 	    return new ListaIterador();
     }
 
+    public Nodo primerNodo() {
+        return first;
+    }
 }
