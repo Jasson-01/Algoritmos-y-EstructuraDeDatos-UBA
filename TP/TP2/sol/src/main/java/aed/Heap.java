@@ -1,25 +1,18 @@
 package aed;
 import java.util.ArrayList;
+import java.util.Comparator;
 
-/*public class Heap<T> {
+public class Heap<T> {
     private ArrayList<T> array;
-
-    T verRaiz(){
-        return array.get(0);
-    }
-
-    //insertar (pensar en listas)
-    //extraerRaiz
-    //ordenar (función privada)
-
-}*/
-
-
-public class Heap<T extends Comparable<T>> {
-    private ArrayList<T> array;
+    private Comparator<T> cmp;
 
     public Heap() {
+        this((a, b) -> ((Comparable<T>) a).compareTo(b));
+    }
+
+    public Heap(Comparator<T> cmp) {
         array = new ArrayList<>();
+        this.cmp = cmp;
     }
 
     public T verRaiz() {
@@ -46,7 +39,7 @@ public class Heap<T extends Comparable<T>> {
     private void siftUp(int i) {
         while (i > 0) {
             int padre = (i - 1) / 2;
-            if (array.get(i).compareTo(array.get(padre)) < 0) {
+            if (cmp.compare(array.get(i), array.get(padre)) > 0) { // heap de máximo
                 swap(i, padre);
                 i = padre;
             } else {
@@ -60,16 +53,16 @@ public class Heap<T extends Comparable<T>> {
         while (true) {
             int izq = 2 * i + 1;
             int der = 2 * i + 2;
-            int menor = i;
+            int mayor = i;
 
-            if (izq < n && array.get(izq).compareTo(array.get(menor)) < 0)
-                menor = izq;
-            if (der < n && array.get(der).compareTo(array.get(menor)) < 0)
-                menor = der;
+            if (izq < n && cmp.compare(array.get(izq), array.get(mayor)) > 0)
+                mayor = izq;
+            if (der < n && cmp.compare(array.get(der), array.get(mayor)) > 0)
+                mayor = der;
 
-            if (menor != i) {
-                swap(i, menor);
-                i = menor;
+            if (mayor != i) {
+                swap(i, mayor);
+                i = mayor;
             } else {
                 break;
             }
