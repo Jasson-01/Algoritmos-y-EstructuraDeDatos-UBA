@@ -5,12 +5,15 @@ public class Transaccion implements Comparable<Transaccion> {
     private int id_comprador;
     private int id_vendedor;
     private int monto;
+    private static int nextUid = 0;
+    private int uid;
 
     public Transaccion(int id, int id_comprador, int id_vendedor, int monto) {
         this.id = id;
         this.id_comprador = id_comprador;
         this.id_vendedor = id_vendedor;
         this.monto = monto;
+        this.uid = nextUid++;
     }
 
     // Para poder usar el id desde el HeapHandleLE
@@ -20,34 +23,30 @@ public class Transaccion implements Comparable<Transaccion> {
 
     @Override
     public int compareTo(Transaccion otro) {
-        int res;
-        if (this.monto > otro.monto){
-            res = 1;
-        }else if(this.monto < otro.monto){
-            res = -1;
-        }else{
-            if(this.id > otro.id){
-                res = 1;
-            }else{
-                res = -1;
-            }
+        if (this.monto != otro.monto) {
+            return Integer.compare(otro.monto, this.monto); // heap de máximo: mayor monto primero
         }
-
-        return res;
+        return Integer.compare(this.id, otro.id); // menor id primero en empate
     }
 
     @Override
     public boolean equals(Object otro){
-        boolean otraEsNull = (otro == null);
-        boolean claseDistinta = otro.getClass() != this.getClass();
-
-        if (otraEsNull || claseDistinta){
-            return false;
-        }
-
+        if (this == otro) return true;
+        if (otro == null || getClass() != otro.getClass()) return false;
         Transaccion otraTrans = (Transaccion) otro;
+        return this.id == otraTrans.id &&
+               this.id_comprador == otraTrans.id_comprador &&
+               this.id_vendedor == otraTrans.id_vendedor &&
+               this.monto == otraTrans.monto;
+    }
 
-	    return this.monto == otraTrans.monto && this.id == otraTrans.id &&  this.id_comprador == otraTrans.id_comprador && this.id_vendedor == otraTrans.id_vendedor;
+    @Override
+    public int hashCode() {
+        int result = Integer.hashCode(id);
+        result = 31 * result + Integer.hashCode(id_comprador);
+        result = 31 * result + Integer.hashCode(id_vendedor);
+        result = 31 * result + Integer.hashCode(monto);
+        return result;
     }
 
     public int monto() {
@@ -60,5 +59,9 @@ public class Transaccion implements Comparable<Transaccion> {
     
     public int id_vendedor() {
         return id_vendedor;
+    }
+
+    public int uid() {
+        return this.uid;
     }
 }

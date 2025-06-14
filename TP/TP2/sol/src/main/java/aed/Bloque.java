@@ -1,5 +1,5 @@
 package aed;
-public class Bloque {
+public class Bloque implements Comparable<Bloque> {
     private int id;
     private ListaEnlazada<Transaccion> transacciones;
     private int sumaMontos;
@@ -30,5 +30,8 @@ public class Bloque {
 
     // Faltan funciones sobre manejo de heap de transacciones y la lista enlazada de transacciones
 
-    
+    @Override
+    public int compareTo(Bloque otro) {
+        return Integer.compare(this.sumaMontos, otro.sumaMontos);
+    }
 }

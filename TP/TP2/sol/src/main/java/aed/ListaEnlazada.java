@@ -2,7 +2,7 @@ package aed;
 
 import java.util.*;
 
-public class ListaEnlazada<T> { 
+public class ListaEnlazada<T extends Comparable<T>> { 
     private Nodo first;
     private Nodo last;
     private int size;
@@ -16,7 +16,7 @@ public class ListaEnlazada<T> {
         Nodo( T v){ valor = v;}
     }
 
-    public class Handle {
+    public class Handle implements Comparable<Handle> {
         private Nodo handle;
         private Handle(Nodo handle) {
             this.handle = handle;
@@ -29,6 +29,11 @@ public class ListaEnlazada<T> {
         }
         public Nodo getNodo() {
             return handle;
+        }
+
+        @Override
+        public int compareTo(Handle otro) {
+            return this.valor().compareTo(otro.valor());
         }
     }
 
@@ -63,20 +68,11 @@ public class ListaEnlazada<T> {
         Nodo n = h.getNodo();
         if (n == null) return;
         // Si el nodo ya no está en la lista, no hacer nada
-        if (n != first && n != last) {
-            if (n.previous == null || n.next == null) return;
-            n.previous.next = n.next;
-            n.next.previous = n.previous;
-        } else if (n == first) {
-            first = n.next;
-            if (first != null) first.previous = null;
-        } else if (n == last) {
-            last = n.previous;
-            if (last != null) last.next = null;
-        } else {
-            return;
-        }
-        if (size > 0) size--;
+        if (n.previous != null) n.previous.next = n.next;
+        else first = n.next;
+        if (n.next != null) n.next.previous = n.previous;
+        else last = n.previous;
+        size--;
     }
 
     // Lo necesitamos para 'bloques.longitud() en (2)'
