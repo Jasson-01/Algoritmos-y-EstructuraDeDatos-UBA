@@ -49,4 +49,12 @@ public class Usuario implements Comparable<Usuario> {
     public int id() {
         return id;
     }
+
+    public void sumar(int monto) {
+        patrimonio += monto;
+    }
+    
+    public void restar(int monto) {
+        patrimonio -= monto;
+    }
 }

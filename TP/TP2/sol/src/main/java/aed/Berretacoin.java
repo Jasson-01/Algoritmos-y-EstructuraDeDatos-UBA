@@ -1,166 +1,204 @@
 package aed;
 
+import java.util.ArrayList;
+
 public class Berretacoin {
-    // Atributos principales
-    private int[] saldosUsuarios;
     private ListaEnlazada<Bloque> bloques;
-    private int cantidadUsuarios;
+    private ListaEnlazada<Transaccion> transacciones; 
+    private HeapHandleLE heapHandleLE; 
+    private HeapHandleArray heapHandleArray; 
 
-    // Constructor
-    public Berretacoin(int nUsuarios) {
-        this.cantidadUsuarios = nUsuarios;
-        this.saldosUsuarios = new int[nUsuarios + 1]; // Tamaño n+1, índice 0 no se usa
+
+    public Berretacoin(int n_usuarios){
+        this.transacciones = new ListaEnlazada<>();
         this.bloques = new ListaEnlazada<>();
+        this.heapHandleLE = new HeapHandleLE();
+        this.heapHandleArray = new HeapHandleArray(n_usuarios); //O(P)-Aclaracion en el constructor.+
+
     }
 
-    // Métodos a implementar:
-    // agregarBloque, txMayorValorUltimoBloque, txUltimoBloque, maximoTenedor, montoMedioUltimoBloque, hackearTx
-    // ...
-
-    public void agregarBloque(Transaccion[] transacciones) {
-        ListaEnlazada<Transaccion> listaTx = new ListaEnlazada<>();
-        int sumaMontos = 0;
-        if (transacciones != null) {
-            for (Transaccion tx : transacciones) {
-                if (tx != null) {
-                    listaTx.agregarAtras(tx);
-                    sumaMontos += tx.monto();
-                    int comprador = tx.id_comprador();
-                    int vendedor = tx.id_vendedor();
-                    if (comprador == 0) {
-                        if (vendedor > 0 && vendedor < saldosUsuarios.length) {
-                            saldosUsuarios[vendedor] += tx.monto();
-                        }
-                    } else {
-                        if (comprador > 0 && comprador < saldosUsuarios.length) {
-                            saldosUsuarios[comprador] -= tx.monto();
-                        }
-                        if (vendedor > 0 && vendedor < saldosUsuarios.length) {
-                            saldosUsuarios[vendedor] += tx.monto();
-                        }
-                    }
+    public void agregarBloque(Transaccion[] transacciones){
+        {   
+            // Transacciones del bloque
+            // 0(nb*logP)
+            ListaEnlazada<Transaccion> nuevoBloqueTxs = new ListaEnlazada<>(); //O(1)
+            for (Transaccion t : transacciones) { // O(nb)
+                // Agregamos cada transacción al bloque
+                nuevoBloqueTxs.agregarAtras(t); //O(1)
+                // Declaro a la transferencia agregada como un nodo de LE
+                ListaEnlazada<Transaccion>.Nodo nodo = nuevoBloqueTxs.obtenerUltimo();
+    
+                // Registramos el nodo en el heap y el handle
+                heapHandleLE.insertar(nodo); //O(log P)
+    
+                // Actualizamos el patrimonio de los usuarios
+                if (t.id_comprador() == 0) { // Transaccion de creacion
+                    heapHandleArray.actualizarPatrimonio(t.id_vendedor()-1,t.monto()); 
+                } else {
+                    heapHandleArray.actualizarPatrimonio(t.id_comprador()-1, -t.monto());
+                    heapHandleArray.actualizarPatrimonio(t.id_vendedor()-1,t.monto());
                 }
             }
+    
+            int id_bloque = bloques.longitud(); //0(1)
+            int montoAcumulado = 0; //0(1)
+            for (Transaccion t : transacciones) { //0(nb)
+                if (t.id_comprador() != 0) { 
+                    montoAcumulado += t.monto();
+                }
+            }
+            // Agregamos el bloque a la lista de bloques
+            Bloque bloque = new Bloque(id_bloque, nuevoBloqueTxs, montoAcumulado); //O(1)
+            bloques.agregarAtras(bloque); //O(1)
         }
-        Bloque nuevoBloque = new Bloque(bloques.longitud(), listaTx, sumaMontos);
-        bloques.agregarAtras(nuevoBloque);
     }
 
-    public Transaccion txMayorValorUltimoBloque() {
-        if (bloques.longitud() == 0) return null;
-        Bloque ultimo = bloques.obtener(bloques.longitud() - 1);
-        // Usar HeapHandle para obtener la transacción máxima
-        return ultimo.heapTransacciones().verRaiz();
+/*
+EJEMPLO DETALLADO DE agregarBloque PASO A PASO
+
+Supongamos que se llama a:
+
+agregarBloque(new Transaccion[] {
+    new Transaccion(0, 0, 1, 50), // Transacción de creación al usuario 1
+    new Transaccion(1, 2, 3, 10), // Transferencia del 2 al 3
+    new Transaccion(2, 1, 2, 30)  // Transferencia del 1 al 2
+});
+
+------------------------------------------------------------
+ESTRUCTURAS INICIALES:
+usuarios[] = [null, (1, 0), (2, 0), (3, 0)] // La creamos en (1)
+bloques = vacía
+heapHandleLE.heap = vacío
+heapHandleLE.handle = vacío
+------------------------------------------------------------
+
+1. Creamos nuevoBloqueTxs = nueva ListaEnlazada<Transaccion>
+2. Iteramos por cada transacción:
+
+------------------------------------------------------------
+(1) Transacción t0: (id=0, comprador=0, vendedor=1, monto=50)
+
+2.1 Se agrega a nuevoBloqueTxs → se crea Nodo0 con valor t0
+2.2 Nodo0 = nuevoBloqueTxs.obtenerUltimo() // Necesito que sea un nodo xq asi lo requiere heaphandleLE.agregar()
+2.3 heapHandleLE.agregar(Nodo0)
+
+  Dentro de heapHandleLE.agregar:
+    - heap.insertar(t0): agrega Transacción(0, ..., 50) al heap.
+    - handle.set(0, Nodo0): guarda Nodo0 en handle[0] --> La guarda en el id='id'=0 (en orden...)
+
+2.4 Como t0 es de creación (id_comprador == 0):
+    usuarios[1].sumar(50)
+
+------------------------------------------------------------
+(2) Transacción t1: (id=1, comprador=2, vendedor=3, monto=10)
+
+2.1 Se agrega a nuevoBloqueTxs → se crea Nodo1 con valor t1
+2.2 Nodo1 = nuevoBloqueTxs.obtenerUltimo()
+2.3 heapHandleLE.agregar(Nodo1)
+
+  Dentro de heapHandleLE.agregar:
+    - heap.insertar(t1)
+    - handle.set(1, Nodo1)
+
+2.4 No es de creación:
+    usuarios[2].restar(10) → patrimonio = -10 -> Aca no se habria un problema... No seria correcto que haya patrimonois negativos...
+    usuarios[3].sumar(10)  → patrimonio = 10
+
+------------------------------------------------------------
+(3) Transacción t2: (id=2, comprador=1, vendedor=2, monto=30)
+
+2.1 Se agrega a nuevoBloqueTxs → se crea Nodo2 con valor t2
+2.2 Nodo2 = nuevoBloqueTxs.obtenerUltimo()
+2.3 heapHandleLE.agregar(Nodo2)
+
+  Dentro de heapHandleLE.agregar:
+    - heap.insertar(t2)
+    - handle.set(2, Nodo2)
+
+2.4 No es de creación:
+    usuarios[1].restar(30) → patrimonio = 20
+    usuarios[2].sumar(30)  → patrimonio = 20
+
+------------------------------------------------------------
+3. Calculamos id_bloque = bloques.longitud() → 0 (seria el primero)
+4. Calculamos montoAcumulado = 10 + 30 = 40 (sin el de creación)
+5. Creamos nuevo Bloque:
+   bloque = new Bloque(0, nuevoBloqueTxs, 40)
+6. bloques.agregarAtras(bloque)
+
+------------------------------------------------------------
+ESTADO FINAL DE ESTRUCTURAS
+
+usuarios[]:
+  [null,
+   (1, 20),  // +50 -30
+   (2, 20),  // -10 +30
+   (3, 10)]  // +10
+
+heapHandleLE.heap:
+  contiene t0 (50), t1 (10), t2 (30), ordenado por monto desc
+
+heapHandleLE.handle:
+  handle[0] = Nodo0 (t0)
+  handle[1] = Nodo1 (t1)
+  handle[2] = Nodo2 (t2)
+
+bloques:
+  [ 0, las 3 transacciones, 40 ]
+
+Complejidad general: O(nb * log P):
+OBS: El uso de P entra en la complejidad del heap ya que puede contener
+hasta P transacciones activas, el costo de cada insertar(...) es O(log P).
+
+*/
+
+    public Transaccion txMayorValorUltimoBloque(){
+        return heapHandleLE.verRaiz(); //O(1)
     }
 
-    public Transaccion[] txUltimoBloque() {
-        if (bloques.longitud() == 0) return new Transaccion[0];
-        Bloque ultimo = bloques.obtener(bloques.longitud() - 1);
-        ListaEnlazada<Transaccion> txs = ultimo.transacciones();
-        int n = txs.longitud();
-        Transaccion[] arr = new Transaccion[n];
-        ListaEnlazada<Transaccion>.Nodo actual = txs.primerNodo();
-        int i = 0;
-        while (actual != null) {
-            arr[i++] = actual.valor;
+    public Transaccion[] txUltimoBloque(){
+        Transaccion[] lista = new Transaccion[bloques.obtenerUltimo().valor.transacciones().longitud()];
+        ListaEnlazada<Transaccion>.Nodo actual = bloques.obtenerUltimo().valor.transacciones().obtenerPrimero();
+        for(int i = 0; i < lista.length; i++){ //O(nb)
+            lista[i] = actual.valor;
             actual = actual.next;
         }
-        return arr;
+        return lista;
     }
 
-    public int maximoTenedor() {
-        int maxSaldo = Integer.MIN_VALUE;
-        int maxIdx = 1;
-        for (int i = 1; i < saldosUsuarios.length; i++) {
-            if (saldosUsuarios[i] > maxSaldo || (saldosUsuarios[i] == maxSaldo && i < maxIdx)) {
-                maxSaldo = saldosUsuarios[i];
-                maxIdx = i;
-            }
-        }
-        return maxIdx;
+    public int maximoTenedor(){
+        return heapHandleArray.verRaiz().id(); //O(1)
     }
 
-    public int montoMedioUltimoBloque() {
-        if (bloques.longitud() == 0) return 0;
-        Bloque ultimo = bloques.obtener(bloques.longitud() - 1);
-        ListaEnlazada<Transaccion> txs = ultimo.transacciones();
-        int suma = 0;
-        int n = 0;
-        ListaEnlazada<Transaccion>.Nodo actual = txs.primerNodo();
-        while (actual != null) {
-            if (actual.valor.id_comprador() != 0) {
-                suma += actual.valor.monto();
-                n++;
-            }
-            actual = actual.next;
+    public int montoMedioUltimoBloque(){
+        ListaEnlazada<Bloque>.Nodo ultimo = bloques.obtenerUltimo(); //O(1)
+        int res =  0;
+        if(ultimo.valor.transacciones().longitud()!=1){
+            res = ultimo.valor.sumaMontos()/(ultimo.valor.transacciones().longitud()-1);
         }
-        return n == 0 ? 0 : suma / n;
+        return res; 
     }
 
-    public void hackearTx() {
-        if (bloques.longitud() == 0) return;
-        Bloque ultimo = bloques.obtener(bloques.longitud() - 1);
-        ListaEnlazada<Transaccion> txs = ultimo.transacciones();
-        ListaEnlazada<Transaccion>.Nodo actual = txs.primerNodo();
-        ListaEnlazada<Transaccion>.Nodo maxNodo = null;
-        int maxMonto = Integer.MIN_VALUE;
-        int minOrden = Integer.MAX_VALUE;
-        int orden = 0;
-        // Buscar la transacción de mayor monto, desempate por primer aparición
-        while (actual != null) {
-            if (actual.valor != null) {
-                int monto = actual.valor.monto();
-                if (monto > maxMonto || (monto == maxMonto && orden < minOrden)) {
-                    maxMonto = monto;
-                    minOrden = orden;
-                    maxNodo = actual;
-                }
-            }
-            actual = actual.next;
-            orden++;
-        }
-        if (maxNodo != null && maxMonto > 0) {
-            int comprador = maxNodo.valor.id_comprador();
-            int vendedor = maxNodo.valor.id_vendedor();
-            int montoOriginal = maxNodo.valor.monto();
-            // Revertir el saldo original SOLO si el monto era mayor a 0
-            if (comprador == 0) {
-                if (vendedor > 0 && vendedor < saldosUsuarios.length) {
-                    saldosUsuarios[vendedor] -= montoOriginal;
-                }
-            } else {
-                if (comprador > 0 && comprador < saldosUsuarios.length) {
-                    saldosUsuarios[comprador] += montoOriginal;
-                }
-                if (vendedor > 0 && vendedor < saldosUsuarios.length) {
-                    saldosUsuarios[vendedor] -= montoOriginal;
-                }
-            }
-            // Cambiar el monto a 0
-            Transaccion txHackeada = new Transaccion(
-                maxNodo.valor.id,
-                maxNodo.valor.id_comprador(),
-                maxNodo.valor.id_vendedor(),
-                0
-            );
-            maxNodo.valor = txHackeada;
-            // Reconstruir el heap del bloque en el mismo orden de la lista
-            HeapHandle nuevoHeap = new HeapHandle();
-            ListaEnlazada<Transaccion>.Nodo nodo = txs.primerNodo();
-            int idx = 0;
-            while (nodo != null) {
-                nuevoHeap.agregar(nodo, idx);
-                nodo = nodo.next;
-                idx++;
-            }
-            try {
-                java.lang.reflect.Field heapField = ultimo.getClass().getDeclaredField("heapTx");
-                heapField.setAccessible(true);
-                heapField.set(ultimo, nuevoHeap);
-            } catch (Exception e) {
-                // No hacer nada
-            }
-        }
-    }
+    public void hackearTx(){
 
+        /*Este modifica:
+         * Heap de transacciones (elimina el maximo)
+         * Heap de usuarios (usamos el método hackeo para actualizar los patrimonios)
+         * sumaMontos del Bloque
+         * longitud del la LE de transacciones
+        */
+        Transaccion eliminado = heapHandleLE.verRaiz(); //Guardo el elemento a eliminar - O(1)
+        heapHandleLE.extraerRaiz(transacciones);//Borramos la raiz del heap de trans - O(log nb)
+        //Intento actualizar  la lista de trans y el bloque
+        ListaEnlazada<Transaccion>.Nodo nodoAEliminar = heapHandleLE.getNodoMax();  //Obtengo el nodo a eliminar - O(1)
+        transacciones.eliminarRapido(nodoAEliminar); // Elimino el nodo - O(1)
+
+        //Guardo monto actual del bloque
+        int sumaMontoActualBloque = bloques.obtenerUltimo().valor.sumaMontos(); //O(1)
+        int sumaActualizada = sumaMontoActualBloque - eliminado.monto(); //O(1)
+        /*Actualizo el bloque*/
+        bloques.obtenerUltimo().valor.actualizar(transacciones, sumaActualizada); //O(1)
+        //heapHandleArray.hackeo(eliminado.id_comprador(),eliminado.id_vendedor(),eliminado.monto()); 
+        //hackeamos a los usuarios - O(log P) - creo
+    }
 }
