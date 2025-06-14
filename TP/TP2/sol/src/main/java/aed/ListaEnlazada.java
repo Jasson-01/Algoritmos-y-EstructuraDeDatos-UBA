@@ -16,6 +16,23 @@ public class ListaEnlazada<T> {
         Nodo( T v){ valor = v;}
     }
 
+    public class Handle {
+        private Nodo handle;
+        private Handle(Nodo handle) {
+            this.handle = handle;
+        }
+        public T valor() {
+            return handle.valor;
+        }
+        public Handle siguiente() {
+            return handle.next == null ? null : new Handle(handle.next);
+        }
+        public Nodo getNodo() {
+            return handle;
+        }
+    }
+
+
     // Constructor
     public ListaEnlazada() {
         first = null;
@@ -25,7 +42,7 @@ public class ListaEnlazada<T> {
 
     // Lo necesitamos para agregar el bloque al final de la cadena rapido
     // O(1)
-    public void agregarAtras(T elem) {
+    public Handle agregarAtras(T elem) {
         Nodo nuevo = new Nodo(elem);
         if(first == null){
             first = nuevo;
@@ -36,23 +53,30 @@ public class ListaEnlazada<T> {
             last = nuevo;
         }
         size++;
+        return new Handle(nuevo);
     }
 
     // Lo necesitamos para eliminar directamente el nodo en HeapHandleLE.
     // O(1)
-    public void eliminarRapido(Nodo n){
-        if(n != first && n != last){
+    public void eliminarRapido(Handle h){
+        if (h == null) return;
+        Nodo n = h.getNodo();
+        if (n == null) return;
+        // Si el nodo ya no está en la lista, no hacer nada
+        if (n != first && n != last) {
+            if (n.previous == null || n.next == null) return;
             n.previous.next = n.next;
             n.next.previous = n.previous;
-        }else if(n == first){
+        } else if (n == first) {
             first = n.next;
-            first.previous = null;
-        }else{
+            if (first != null) first.previous = null;
+        } else if (n == last) {
             last = n.previous;
-            last.next = null;
+            if (last != null) last.next = null;
+        } else {
+            return;
         }
-        
-        size--; 
+        if (size > 0) size--;
     }
 
     // Lo necesitamos para 'bloques.longitud() en (2)'
@@ -63,13 +87,13 @@ public class ListaEnlazada<T> {
 
     // Lo necesitamos en (2).
     // O(1)
-    public Nodo obtenerUltimo() {
-        return last;
+    public Handle obtenerUltimo() {
+        return last == null ? null : new Handle(last);
     }
 
     //Fa: necesario para el (4); O(1)
-    public Nodo obtenerPrimero(){
-        return first;
+    public Handle obtenerPrimero(){
+        return first == null ? null : new Handle(first);
     }
 
 }

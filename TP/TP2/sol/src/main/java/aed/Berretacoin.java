@@ -26,10 +26,10 @@ public class Berretacoin {
                 // Agregamos cada transacción al bloque
                 nuevoBloqueTxs.agregarAtras(t); //O(1)
                 // Declaro a la transferencia agregada como un nodo de LE
-                ListaEnlazada<Transaccion>.Nodo nodo = nuevoBloqueTxs.obtenerUltimo();
+                ListaEnlazada<Transaccion>.Handle handle = nuevoBloqueTxs.obtenerUltimo();
     
                 // Registramos el nodo en el heap y el handle
-                heapHandleLE.insertar(nodo); //O(log P)
+                heapHandleLE.insertar(handle); //O(log P)
     
                 // Actualizamos el patrimonio de los usuarios
                 if (t.id_comprador() == 0) { // Transaccion de creacion
@@ -157,11 +157,17 @@ hasta P transacciones activas, el costo de cada insertar(...) es O(log P).
     }
 
     public Transaccion[] txUltimoBloque(){
-        Transaccion[] lista = new Transaccion[bloques.obtenerUltimo().valor.transacciones().longitud()];
-        ListaEnlazada<Transaccion>.Nodo actual = bloques.obtenerUltimo().valor.transacciones().obtenerPrimero();
-        for(int i = 0; i < lista.length; i++){ //O(nb)
-            lista[i] = actual.valor;
-            actual = actual.next;
+        ListaEnlazada<Bloque>.Handle bloqueHandle = bloques.obtenerUltimo();
+        if (bloqueHandle == null) return new Transaccion[0];
+        Bloque bloque = bloqueHandle.valor();
+        ListaEnlazada<Transaccion> txs = bloque.transacciones();
+        int len = txs.longitud();
+        if (len <= 0) return new Transaccion[0];
+        Transaccion[] lista = new Transaccion[len];
+        ListaEnlazada<Transaccion>.Handle actual = txs.obtenerPrimero();
+        for(int i = 0; i < lista.length && actual != null; i++){
+            lista[i] = actual.valor();
+            actual = actual.siguiente();
         }
         return lista;
     }
@@ -171,34 +177,55 @@ hasta P transacciones activas, el costo de cada insertar(...) es O(log P).
     }
 
     public int montoMedioUltimoBloque(){
-        ListaEnlazada<Bloque>.Nodo ultimo = bloques.obtenerUltimo(); //O(1)
+        ListaEnlazada<Bloque>.Handle ultimo = bloques.obtenerUltimo();
+        Bloque bloque = ultimo.valor();
         int res =  0;
-        if(ultimo.valor.transacciones().longitud()!=1){
-            res = ultimo.valor.sumaMontos()/(ultimo.valor.transacciones().longitud()-1);
+        if(bloque.transacciones().longitud()!=1){
+            res = bloque.sumaMontos()/(bloque.transacciones().longitud()-1);
         }
         return res; 
     }
 
-    public void hackearTx(){
+    public void hackearTx() {
+    // Elimina la transacción de mayor valor del heap y de la lista
+    Transaccion eliminado = heapHandleLE.verRaiz();
+    heapHandleLE.extraerRaiz(transacciones);
 
-        /*Este modifica:
-         * Heap de transacciones (elimina el maximo)
-         * Heap de usuarios (usamos el método hackeo para actualizar los patrimonios)
-         * sumaMontos del Bloque
-         * longitud del la LE de transacciones
-        */
-        Transaccion eliminado = heapHandleLE.verRaiz(); //Guardo el elemento a eliminar - O(1)
-        heapHandleLE.extraerRaiz(transacciones);//Borramos la raiz del heap de trans - O(log nb)
-        //Intento actualizar  la lista de trans y el bloque
-        ListaEnlazada<Transaccion>.Nodo nodoAEliminar = heapHandleLE.getNodoMax();  //Obtengo el nodo a eliminar - O(1)
-        transacciones.eliminarRapido(nodoAEliminar); // Elimino el nodo - O(1)
+    // Obtén el handle del nodo a eliminar (máximo)
+    ListaEnlazada<Transaccion>.Handle nodoAEliminar = heapHandleLE.getHandleMax();
+    transacciones.eliminarRapido(nodoAEliminar);
 
-        //Guardo monto actual del bloque
-        int sumaMontoActualBloque = bloques.obtenerUltimo().valor.sumaMontos(); //O(1)
-        int sumaActualizada = sumaMontoActualBloque - eliminado.monto(); //O(1)
-        /*Actualizo el bloque*/
-        bloques.obtenerUltimo().valor.actualizar(transacciones, sumaActualizada); //O(1)
-        //heapHandleArray.hackeo(eliminado.id_comprador(),eliminado.id_vendedor(),eliminado.monto()); 
-        //hackeamos a los usuarios - O(log P) - creo
-    }
+    // Actualiza el bloque correspondiente
+    ListaEnlazada<Bloque>.Handle bloqueHandle = bloques.obtenerUltimo();
+    Bloque bloque = bloqueHandle.valor();
+    int sumaMontoActualBloque = bloque.sumaMontos();
+    int sumaActualizada = sumaMontoActualBloque - eliminado.monto();
+    bloque.actualizar(transacciones, sumaActualizada);
+
+    // Si necesitas actualizar el heap de usuarios, descomenta y ajusta:
+    // heapHandleArray.hackeo(eliminado.id_comprador(), eliminado.id_vendedor(), eliminado.monto());
+}
+
+    // public void hackearTx(){
+
+    //     /*Este modifica:
+    //      * Heap de transacciones (elimina el maximo)
+    //      * Heap de usuarios (usamos el método hackeo para actualizar los patrimonios)
+    //      * sumaMontos del Bloque
+    //      * longitud del la LE de transacciones
+    //     */
+    //     Transaccion eliminado = heapHandleLE.verRaiz(); //Guardo el elemento a eliminar - O(1)
+    //     heapHandleLE.extraerRaiz(transacciones);//Borramos la raiz del heap de trans - O(log nb)
+    //     //Intento actualizar  la lista de trans y el bloque
+    //     ListaEnlazada<Transaccion>.Handle nodoAEliminar = heapHandleLE.getNodoMax();  //Obtengo el nodo a eliminar - O(1)
+    //     transacciones.eliminarRapido(nodoAEliminar); // Elimino el nodo - O(1)
+
+    //     //Guardo monto actual del bloque
+    //     int sumaMontoActualBloque = bloques.obtenerUltimo().valor.sumaMontos(); //O(1)
+    //     int sumaActualizada = sumaMontoActualBloque - eliminado.monto(); //O(1)
+    //     /*Actualizo el bloque*/
+    //     bloques.obtenerUltimo().valor.actualizar(transacciones, sumaActualizada); //O(1)
+    //     //heapHandleArray.hackeo(eliminado.id_comprador(),eliminado.id_vendedor(),eliminado.monto()); 
+    //     //hackeamos a los usuarios - O(log P) - creo
+    // }
 }
