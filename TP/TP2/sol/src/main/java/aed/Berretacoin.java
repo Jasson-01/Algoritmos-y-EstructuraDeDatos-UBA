@@ -15,26 +15,28 @@ public class Berretacoin {
     }
 
     public void agregarBloque(Transaccion[] transacciones){
-        // No limpiar el heap global, mantener todas las transacciones activas
+        if (transacciones == null || transacciones.length == 0) return; // No agregar bloques vacíos
         ListaEnlazada<Transaccion> nuevoBloqueTxs = new ListaEnlazada<>();
+        int montoAcumulado = 0;
         for (Transaccion t : transacciones) {
             nuevoBloqueTxs.agregarAtras(t);
-            ListaEnlazada<Transaccion>.Handle handle = nuevoBloqueTxs.obtenerUltimo();
-            heapHandleLE.insertar(handle);
+            ListaEnlazada<Transaccion>.Handle handleTx = nuevoBloqueTxs.obtenerUltimo();
+            heapHandleLE.insertar(handleTx);
             if (t.id_comprador() == 0) {
-                heapHandleArray.actualizarPatrimonio(t.id_vendedor()-1,t.monto()); 
+                if (t.id_vendedor() > 0) {
+                    heapHandleArray.actualizarPatrimonio(t.id_vendedor() - 1, t.monto());
+                }
             } else {
-                heapHandleArray.actualizarPatrimonio(t.id_comprador()-1, -t.monto());
-                heapHandleArray.actualizarPatrimonio(t.id_vendedor()-1,t.monto());
+                if (t.id_comprador() > 0) {
+                    heapHandleArray.actualizarPatrimonio(t.id_comprador() - 1, -t.monto());
+                }
+                if (t.id_vendedor() > 0) {
+                    heapHandleArray.actualizarPatrimonio(t.id_vendedor() - 1, t.monto());
+                }
+                montoAcumulado += t.monto(); // Solo sumar si no es de creación
             }
         }
         int id_bloque = bloques.longitud();
-        int montoAcumulado = 0;
-        for (Transaccion t : transacciones) {
-            if (t.id_comprador() != 0) { 
-                montoAcumulado += t.monto();
-            }
-        }
         Bloque bloque = new Bloque(id_bloque, nuevoBloqueTxs, montoAcumulado);
         bloques.agregarAtras(bloque);
     }
@@ -211,17 +213,35 @@ hasta P transacciones activas, el costo de cada insertar(...) es O(log P).
         heapHandleLE.extraerRaiz(txs);
         // Actualizar suma de montos del bloque
         int sumaMontoActualBloque = bloqueAfectado.sumaMontos();
-        int sumaActualizada = sumaMontoActualBloque - eliminado.monto();
+        int sumaActualizada = sumaMontoActualBloque;
+        if (eliminado.id_comprador() != 0) {
+            sumaActualizada -= eliminado.monto();
+        }
         bloqueAfectado.actualizar(txs, sumaActualizada);
         // Revertir el saldo de los usuarios
         if (eliminado.id_comprador() == 0) {
-            heapHandleArray.actualizarPatrimonio(eliminado.id_vendedor() - 1, -eliminado.monto());
+            if (eliminado.id_vendedor() > 0) {
+                heapHandleArray.actualizarPatrimonio(eliminado.id_vendedor() - 1, -eliminado.monto());
+            }
         } else {
-            heapHandleArray.actualizarPatrimonio(eliminado.id_comprador() - 1, eliminado.monto());
-            heapHandleArray.actualizarPatrimonio(eliminado.id_vendedor() - 1, -eliminado.monto());
+            if (eliminado.id_comprador() > 0) {
+                heapHandleArray.actualizarPatrimonio(eliminado.id_comprador() - 1, eliminado.monto());
+            }
+            if (eliminado.id_vendedor() > 0) {
+                heapHandleArray.actualizarPatrimonio(eliminado.id_vendedor() - 1, -eliminado.monto());
+            }
         }
-        // Eliminar todos los bloques vacíos de forma segura
+        // Eliminar todos los bloques vacíos de forma segura (reforzado)
         ListaEnlazada<Bloque>.Handle bh = bloques.obtenerPrimero();
+        while (bh != null) {
+            ListaEnlazada<Bloque>.Handle next = bh.siguiente();
+            if (bh.valor().transacciones().longitud() == 0) {
+                bloques.eliminarRapido(bh);
+            }
+            bh = next;
+        }
+        // Segunda pasada por si quedaron bloques vacíos por encadenamiento
+        bh = bloques.obtenerPrimero();
         while (bh != null) {
             ListaEnlazada<Bloque>.Handle next = bh.siguiente();
             if (bh.valor().transacciones().longitud() == 0) {

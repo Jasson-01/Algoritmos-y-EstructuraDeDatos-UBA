@@ -11,11 +11,21 @@ public class Usuario implements Comparable<Usuario> {
 
     @Override
     public int compareTo(Usuario otro){
-        if (this.patrimonio != otro.patrimonio) {
-            return Integer.compare(otro.patrimonio, this.patrimonio); // heap de máximo
-        } else {
-            return Integer.compare(otro.id, this.id); // menor id primero en empate (heap de máximo)
+
+        int res;
+        if (this.patrimonio > otro.patrimonio){
+            res = 1;
+        }else if(this.patrimonio < otro.patrimonio){
+            res = -1;
+        }else{
+            if(this.id < otro.id){
+                res = 1;
+            }else{
+                res = -1;
+            }
         }
+
+        return res;
     }
     
     @Override

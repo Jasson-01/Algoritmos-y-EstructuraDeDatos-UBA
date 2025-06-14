@@ -1,14 +1,14 @@
 package aed;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class HeapHandleLE{
     private Heap<ListaEnlazada<Transaccion>.Handle> heap; // Cambiar el tipo del heap para almacenar handles directamente
-    private ArrayList<ListaEnlazada<Transaccion>.Handle> handle; //2da Estructura
+    private HashMap<Integer, ListaEnlazada<Transaccion>.Handle> handleMap; // Usar un Map para sincronización robusta
 
     public HeapHandleLE(){
         heap = new Heap<ListaEnlazada<Transaccion>.Handle>();
-        handle = new ArrayList<ListaEnlazada<Transaccion>.Handle>();
+        handleMap = new HashMap<>();
     }
     // O(1)
     public Transaccion verRaiz(){
@@ -19,10 +19,7 @@ public class HeapHandleLE{
     public void insertar(ListaEnlazada<Transaccion>.Handle h){
         heap.insertar(h); // Insertar el handle directamente
         int uid = h.valor().uid();
-        while (handle.size() <= uid) {
-            handle.add(null);
-        }
-        this.handle.set(uid, h); // Indexar por uid
+        handleMap.put(uid, h); // Indexar por uid
     }
 
     // Mantiene O(log n)
@@ -34,9 +31,7 @@ public class HeapHandleLE{
         }
         if (h != null) {
             int uid = h.valor().uid();
-            if (uid >= 0 && uid < handle.size()) {
-                handle.set(uid, null); // Eliminar el handle de la lista interna
-            }
+            handleMap.remove(uid); // Eliminar el handle del map
         }
     }
 

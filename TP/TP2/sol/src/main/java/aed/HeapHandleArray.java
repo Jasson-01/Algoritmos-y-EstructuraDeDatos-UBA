@@ -1,49 +1,50 @@
 package aed;
+
 import java.util.ArrayList;
 
-// Reclamarle a Fa 
 public class HeapHandleArray {
-    private Heap<Usuario> heap;  
-    private ArrayList<Integer> handle; 
+    private Heap<Usuario> heap;
+    private ArrayList<Integer> handle;
 
-    public HeapHandleArray(int n){
-        heap = new Heap<Usuario>(); //O(1)
-        handle = new ArrayList<Integer>(); //O(1)
-
-        for(int i = 1; i <= n; i++){ //O(P)
-
-            /* Explicación: Si bien insertar usario a usuario en un heap es O(P log P),
-             * como para este caso se insertan todos los usuarios con el mismo
-             * patrimonio inicial, que es 0, y en orden de id creciente, se
-             * logra tener una complejidad de O(P).
-             */
-
+    public HeapHandleArray(int n) {
+        heap = new Heap<Usuario>();
+        handle = new ArrayList<Integer>();
+        for (int i = 1; i <= n; i++) {
             Usuario u = new Usuario(i);
-            heap.insertar(u); // Agrego Usuario 1 en la pos 0.
-            handle.add(i-1); // Agrego Usuario 1 en la pos 0.
+            heap.insertar(u);
+            handle.add(0); // inicializar con 0, se corrige abajo
         }
-    }
-    
-    public Usuario verRaiz(){
-        return heap.verRaiz(); //O(1)
-    }
-
-    public void actualizarPatrimonio(int id, int monto){
-        Usuario usuario = heap.get(handle.get(id)); //O(1)
-        usuario.sumar(monto);//O(1)
-        actualizarHeap(id);//O(log P)
-    }
-
-    private void actualizarHeap(int id){ //O(log P)
-        ArrayList<Heap<Usuario>.Tupla>  t = new ArrayList<Heap<Usuario>.Tupla>();
-        t = heap.siftUp(id);//O(log P)
-        for(int i = 0; i < t.size(); i++){
-            handle.set(t.get(i).valor.id() - 1,t.get(i).indice);
-        }
-        t = heap.siftDown(id);//O(log P)
-        for(int i = 0; i < t.size(); i++){
-            handle.set(t.get(i).valor.id() - 1,t.get(i).indice);
+        // Sincronizar handle con la posición real de cada usuario en el heap
+        for (int i = 0; i < n; i++) {
+            Usuario u = heap.get(i);
+            handle.set(u.id() - 1, i);
         }
     }
 
+    public Usuario verRaiz() {
+        return heap.verRaiz();
+    }
+
+    /**
+     * Actualiza el patrimonio del usuario dado su ID (entero > 0) y reordena el
+     * heap.
+     */
+    public void actualizarPatrimonio(int idUsuario, int monto) {
+        // Solo actualizar si el idUsuario es válido
+        if (idUsuario <= 0 || idUsuario > handle.size())
+            return;
+        int pos = handle.get(idUsuario - 1);
+        Usuario usuario = heap.get(pos);
+        usuario.sumar(monto);
+        // Reajustar heap hacia arriba
+        ArrayList<Heap<Usuario>.Tupla> intercambios = heap.siftUp(pos);
+        for (Heap<Usuario>.Tupla t : intercambios) {
+            handle.set(t.valor.id() - 1, t.indice);
+        }
+        // Reajustar heap hacia abajo
+        intercambios = heap.siftDown(pos);
+        for (Heap<Usuario>.Tupla t : intercambios) {
+            handle.set(t.valor.id() - 1, t.indice);
+        }
+    }
 }

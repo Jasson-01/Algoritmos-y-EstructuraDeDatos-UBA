@@ -2,41 +2,19 @@ package aed;
 
 import java.util.*;
 
-public class ListaEnlazada<T extends Comparable<T>> { 
+public class ListaEnlazada<T> { 
     private Nodo first;
     private Nodo last;
     private int size;
 
 
-    private class Nodo {
+    public class Nodo {
         T valor;
         Nodo next;
         Nodo previous;
 
         Nodo( T v){ valor = v;}
     }
-
-    public class Handle implements Comparable<Handle> {
-        private Nodo handle;
-        private Handle(Nodo handle) {
-            this.handle = handle;
-        }
-        public T valor() {
-            return handle.valor;
-        }
-        public Handle siguiente() {
-            return handle.next == null ? null : new Handle(handle.next);
-        }
-        public Nodo getNodo() {
-            return handle;
-        }
-
-        @Override
-        public int compareTo(Handle otro) {
-            return this.valor().compareTo(otro.valor());
-        }
-    }
-
 
     // Constructor
     public ListaEnlazada() {
@@ -47,7 +25,7 @@ public class ListaEnlazada<T extends Comparable<T>> {
 
     // Lo necesitamos para agregar el bloque al final de la cadena rapido
     // O(1)
-    public Handle agregarAtras(T elem) {
+    public void agregarAtras(T elem) {
         Nodo nuevo = new Nodo(elem);
         if(first == null){
             first = nuevo;
@@ -58,24 +36,26 @@ public class ListaEnlazada<T extends Comparable<T>> {
             last = nuevo;
         }
         size++;
-        return new Handle(nuevo);
     }
 
     // Lo necesitamos para eliminar directamente el nodo en HeapHandleLE.
     // O(1)
-    public void eliminarRapido(Handle h){
-        if (h == null) return;
-        Nodo n = h.getNodo();
+    public void eliminarRapido(Nodo n){
         if (n == null) return;
-        // Si el nodo ya no está en la lista, no hacer nada
-        if (n.previous != null) n.previous.next = n.next;
-        else first = n.next;
-        if (n.next != null) n.next.previous = n.previous;
-        else last = n.previous;
+        if (n == first && n == last) {
+            first = null;
+            last = null;
+        } else if (n == first) {
+            first = n.next;
+            if (first != null) first.previous = null;
+        } else if (n == last) {
+            last = n.previous;
+            if (last != null) last.next = null;
+        } else {
+            n.previous.next = n.next;
+            n.next.previous = n.previous;
+        }
         size--;
-        // Limpiar referencias para evitar inconsistencias
-        n.next = null;
-        n.previous = null;
     }
 
     // Lo necesitamos para 'bloques.longitud() en (2)'
@@ -86,16 +66,27 @@ public class ListaEnlazada<T extends Comparable<T>> {
 
     // Lo necesitamos en (2).
     // O(1)
-    public Handle obtenerUltimo() {
-        return last == null ? null : new Handle(last);
+    public Nodo obtenerUltimo() {
+        return last;
     }
 
     //Fa: necesario para el (4); O(1)
-    public Handle obtenerPrimero(){
-        return first == null ? null : new Handle(first);
+    public Nodo obtenerPrimero(){
+        return first;
     }
 
+
+
+//Nico
+
+
 }
+
+
+
+
+
+
 
 
 

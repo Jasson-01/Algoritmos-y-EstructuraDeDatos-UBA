@@ -103,6 +103,7 @@ public class Heap<T extends Comparable<T>> {
 
             if (mayor != i) {
                 swap(i, mayor); // O(1)
+                swap(i, mayor); // O(1)
                 Tupla t = new Tupla(mayor, array.get(mayor));
                 swapeado.add(t);
                 i = mayor; // O(1)
