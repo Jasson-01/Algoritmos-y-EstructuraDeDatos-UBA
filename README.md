@@ -2,7 +2,7 @@
 ex-Algo2
 
 
-Videos:
+***Videos:
 
 Complejidad Computacional:
 
