@@ -1,0 +1,36 @@
+var estadiosLibres: vector<ColaDePrioridadLogMax<<Capacidad,Estadio>>> segun la capacidad
+
+var artistasOcupados: DiccionarioLog<Artista,vector<<Capacidad,Estadio>>> 
+
+var cantidadPorEstadio: DiccionarioLog<Estadio,int>
+
+
+proc ProgramarConcierto()
+estadio = dg.estadiosLibres[d].desencolarMax() //O(log(m))
+if (!dg.artistasOcupados.esta(a)){
+dg.artistasOcupados.definir(a, new vector <<Estadio,Capacidad>>)
+}
+dg.artistasOcupados.obtener(a)[d] = <estadio[0],estadio[1]> //log(n)
+
+if (!dg.cantidadPorEstadio.esta(estadio[0])){
+dg.cantidadPorEstadio.definir(estadio[0],1)
+}else{
+cantidad = dg.cantidadPorEstadio.obtener(estadio[0])
+cantidad = cantidad +1
+dg.cantidadPorEstadio.definir(estadio[0],cantidad)
+}
+
+
+proc CancelarConcierto()
+concierto = dg.artistasOcupados.obtener(a)[d] //O(log(n))
+concierto = <>
+if (dg.artistasOcupados.obtener(b)[d] == <>){ O(log(n))
+dg.artistasOcupados.obtener(b)[d] = <concierto[0],concierto[1]> // O(log(n))
+}
+else{
+dg.estadiosLibres[d].encolar(<concierto[0],concierto[1]>) // O(log(m))
+
+cantidad = dg.cantidadPorEstadio.obtener(concierto[0]) // O(log(m))
+cantidad = cantidad -1
+dg.cantidadPorEstadio.definir(concierto[0],cantidad)
+}

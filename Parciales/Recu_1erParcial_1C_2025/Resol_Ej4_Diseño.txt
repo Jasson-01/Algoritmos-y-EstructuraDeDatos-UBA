@@ -1,0 +1,57 @@
+var antiguas: DiccionarioLog<Coleccion, ColaDePrioridadLogMin<Año,Pieza>>
+var PiezasPorAño: DiccionarioDigital<Año,ConjuntoLog<Pieza>>
+var PiezasPorColeccion: DiccionarioLog<Coleccion,ConjuntoLog<Pieza>>
+
+
+proc PrepararColeccion()
+If(!m.PiezasPorColeccion.esta(c)): O(log(c))
+    m.PiezasPorColeccion.definir(c,new ConjuntoLog<Pieza>) O(log(c))
+endif
+
+conjuntoLog := m.PiezasPorColeccion.obtener(c) O(log(c))
+
+for elem in ps: O(p)
+   conjuntoLog.agregar(elem) O(log(p))
+
+m.PiezasPorColeccion.definir(c,conjuntoLog) O(log(c))
+
+  
+proc RegistrarPieza()
+if(!m.antiguas.esta(c)): O(log(c))
+m.antiguas.definir(c,new ColaDePrioridadLogMin<Año,Pieza>) O(log(c))
+endif
+
+m.antiguas.obtener(c).encolar(<a,p>) O(log(c) + log(p)) //segun el año
+
+if(!m.PiezasPorAño.esta(a)): O(1)
+m.piezasPorAño.definir(a, new ConjuntoLog<Pieza>) O(1)
+endif 
+
+m.piezasPorAño.obtener(a).agregar(p) O(log (p))
+
+
+proc PiezasPorAño()
+return m.PiezasPorAño.obtener(a) O(1)
+
+
+proc kPiezasMasAntiguaPorColeccion()
+i = 0
+res = new conjuntoLog<Pieza> O(1)
+coleccion := m.antiguas.obtener(c) O(log(c))
+aux := new conjuntoLog<Pieza>
+
+while (i < k) O(k)
+pieza := coleccion.desencolarMin() O(log(p))
+res.agregar(pieza[1]) O(log (p))
+aux.agregar(pieza)
+i++
+end while
+
+i = 0
+while (i < k) O(k)
+pieza := aux.desencolarMin()
+coleccion.encolar(pieza)
+i++
+end while
+
+return res
