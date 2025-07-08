@@ -1,4 +1,4 @@
-                                      Algoritmos y EstructuraDeDatos - UBA
+                                      Algoritmos y Estructuras_de_Datos - UBA
 ex-Algo2
 
 
@@ -14,6 +14,6 @@ Complejidad Computacional:
 https://youtu.be/vLRd-VEK218?si=STnZ_96BMEkwX8Ob
 
 
-Videos enlistados(Ft_Charlie):
+Videos enlistados(By_Charlie):
 
 https://docs.google.com/spreadsheets/d/1a1k_ECI-mM74ruwCbVZ8KrjV6J_Bu0zw83gniWqki5I/edit?gid=0#gid=0
