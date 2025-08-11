@@ -24,3 +24,6 @@ https://drive.google.com/drive/folders/1KNdIK87tn2lJuhcrBEbDgJI1SP9kkqFf?usp=dri
 
 https://drive.google.com/drive/folders/18BX9zLFnFeardWyePOsAKv1L0WHw5lYD?usp=drive_link
 
+CubaWiki:
+Plan_2023: https://www.cubawiki.com.ar/index.php/Algoritmos_y_Estructuras_de_Datos
+Plan_1993: https://www.cubawiki.com.ar/index.php/Algoritmos_y_Estructuras_de_Datos_II
